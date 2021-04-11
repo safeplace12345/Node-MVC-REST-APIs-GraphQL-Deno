@@ -1,0 +1,25 @@
+{
+  "name": "node-mvc-rest-graph-deno",
+  "version": "1.0.0",
+  "description": "",
+  "main": "routes.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "server": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/safeplace12345/Node-MVC-REST-APIs-GraphQL-Deno.git"
+  },
+  "author": "Ghost <safeplace12345@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/safeplace12345/Node-MVC-REST-APIs-GraphQL-Deno/issues"
+  },
+  "homepage": "https://github.com/safeplace12345/Node-MVC-REST-APIs-GraphQL-Deno#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "nodemon": "^2.0.7"
+  }
+}
