@@ -6,6 +6,7 @@ const path = require('path')
 const rootDir = require('./utils/path')
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
+const errorControllers = require('./controllers/error')
 
 server.set('view engine' , 'ejs');
 server.set('views', 'views')
@@ -16,9 +17,7 @@ server.use(express.static(path.join(rootDir, 'public')));
  // Routing
 server.use("/admin", adminRoutes.router);
 server.use(shopRoutes);
-server.use((req, res) => {
-  res.status(404).render('404',{pageTitle:'Page Not Found'})
-});
+server.use(errorControllers.get404Page);
 
 // Listener
 server.listen(3000);
