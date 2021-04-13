@@ -20,6 +20,7 @@
   "homepage": "https://github.com/safeplace12345/Node-MVC-REST-APIs-GraphQL-Deno#readme",
   "dependencies": {
     "body-parser": "^1.19.0",
+    "ejs": "^3.1.6",
     "express": "^4.17.1",
     "nodemon": "^2.0.7"
   }
