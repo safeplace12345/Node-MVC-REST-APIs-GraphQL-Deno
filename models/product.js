@@ -9,16 +9,32 @@ const readProductsFile = (cb) => {
     return cb(JSON.parse(content));
   });
 };
+
+const fetchAllProducts = (cb) => {
+  return readProductsFile(cb);
+};
+const fetchProduct = (productId, cb) => {
+  let product = {};
+  return readProductsFile((products) => {
+    product = products.find(({id}) => id === productId);
+    return cb(product)
+  });
+};
 const file = path.join(
   path.dirname(process.mainModule.filename),
   "data",
   "products.json"
 );
+
 class Product {
-  constructor(t) {
-    this.title = t;
+  constructor({ title, image, price, description }) {
+    (this.title = title),
+      (this.image = image),
+      (this.price = +price),
+      (this.description = description);
   }
   save() {
+    this.id = Math.random().toString();
     return readProductsFile((products) => {
       products.push(this);
       fs.writeFile(file, JSON.stringify(products), (err) => {
@@ -30,5 +46,6 @@ class Product {
 
 module.exports = {
   Product,
-  readProductsFile
+  fetchProduct,
+  fetchAllProducts
 };

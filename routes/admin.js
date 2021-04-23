@@ -5,13 +5,8 @@ const path = require("path");
 const adminController = require('../controllers/admin')
 
 router.get("/add-product", adminController.getAddProductsPage);
+router.get("/add-product/:prodID", adminController.editProductsPage);
 router.post("/products", adminController.postProductsPage);
-router.get('/productsList',(req,res,next)=> {
-    res.render('admin/productsList',{
-        pageTitle: 'Admin Products',
-        path: '/admin/productsList',
-        products : []
-    })
-})
+router.get('/productsList',adminController.getAllAdminProducts)
 
 module.exports = { router };
