@@ -1,17 +1,18 @@
 const fs = require("fs");
-const path = require("path");
+const pathMaker = require('../utils/pathMaker')
+const fileReader = require('../utils/readFiles')
+const database = require('../utils/database')
 
+const file = pathMaker("products.json");
 const readProductsFile = (cb) => {
-  return fs.readFile(file, "utf-8", (err, content) => {
-    if (err) {
-      return cb([]);
-    }
-    return cb(JSON.parse(content));
-  });
+  return fileReader.products(cb,file)
 };
 
-const fetchAllProducts = (cb) => {
-  return readProductsFile(cb);
+
+function fetchAllProducts(cb){
+  return readProductsFile(products => {
+ cb(products)
+  }) 
 };
 const fetchProduct = (productId, cb) => {
   let product = {};
@@ -20,32 +21,50 @@ const fetchProduct = (productId, cb) => {
     return cb(product)
   });
 };
-const file = path.join(
-  path.dirname(process.mainModule.filename),
-  "data",
-  "products.json"
-);
+const writeFile = content => fs.writeFile(file,JSON.stringify(content),err => {
+  console.log(err);
+})
 
 class Product {
   constructor({ title, image, price, description }) {
-    (this.title = title),
-      (this.image = image),
-      (this.price = +price),
-      (this.description = description);
-  }
-  save() {
-    this.id = Math.random().toString();
-    return readProductsFile((products) => {
-      products.push(this);
-      fs.writeFile(file, JSON.stringify(products), (err) => {
-        console.log(err);
-      });
+    (this.title = title.trim()),
+    (this.image = image.trim()),
+    (this.price = +price),
+    (this.description = description.trim());
+      this.id = null;
+    }
+    save() {
+      this.id = Math.floor(Math.random() * 1000).toString();
+      return readProductsFile((products) => {
+        products.push(this);
+        writeFile(products);
     });
   }
+  edit(id){
+    return readProductsFile((products => {
+      const existingItemIndex = products.findIndex(prod => +prod.id == +id);
+      this.id = id.trim()
+      console.log(existingItemIndex)
+      const updatedProducts = [...products];
+      updatedProducts[existingItemIndex] = this
+      writeFile(updatedProducts)
+    }
+    )
+    )
+  }
+}
+const deleteProductFromFile = (id,cb) => {
+  return readProductsFile(products => {
+    let updatedProducts = products.filter((product) => +product.id !== +id);
+    // fix delete from cart as well
+    writeFile(updatedProducts);
+     return cb(updatedProducts)
+  })
 }
 
 module.exports = {
   Product,
   fetchProduct,
-  fetchAllProducts
+  fetchAllProducts,
+  deleteProductFromFile
 };

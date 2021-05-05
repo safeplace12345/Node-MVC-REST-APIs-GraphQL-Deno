@@ -2,9 +2,7 @@
   <button type="button" class="btn">
     <a href="/productDetails/<%= product.id %>"> Details</a>
   </button>
-
   <form action="/cart" method="post">
-    <label for="proID"> Product ID : </label>
     <input
       type="text"
       value="<%= product.id %>"
@@ -12,6 +10,15 @@
       style="display: none"
       name="proID"
     />
-    <button class="btn" type="submit">Add to Cart</button>
+    <input
+      type="number"
+      value="<%= product.price %>"
+      id="proPrice"
+      style="display: none"
+      name="proPrice"
+    />
+    <% if (path !== '/index') { %>
+      <button class="btn" type="submit">Add to Cart</button>
+    <% } %>
   </form>
 </div>

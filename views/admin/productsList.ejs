@@ -21,9 +21,14 @@
                     <p class="product__description">A very interesting book about so many even more interesting things!</p>
                 </div>
                 <div class="card__actions">
-                    <button class="btn"><a href="/product/edit${}">Edit Product</a></button>
-                    <form action="/product/delete" method="post"></form>
-                    <button class="btn" type="submit"> Delete Product</button>
+                    
+                    <button type="button" class="btn">
+    <a href="/admin/add-product/<%= product.id %>?edit=true"> Edit Product </a>
+  </button>
+                    <form action="/admin/delete" method="post">
+                    <input type="text" style="display:none;" value="<%= product.id %> " name="productID">
+                        <button class="btn" type="submit"> Delete Product</button>
+                    </form>
                 </div>
             </article>
             <% } %> 

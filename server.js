@@ -7,6 +7,8 @@ const rootDir = require('./utils/path')
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 const errorControllers = require('./controllers/error')
+const db = require('./utils/database')
+
 
 server.set('view engine' , 'ejs');
 server.set('views', 'views')

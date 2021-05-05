@@ -5,8 +5,14 @@
 <body>
     <%- include('../includes/nav.ejs') %> 
     <main>
-        <h1>My Products</h1>
         <% if(products.length > 0) { %> 
+            <div class="cart-nav">
+                <h1>Cart Products</h1>
+                <div class="banner">
+                    <h2 class="total">Total Products :<%= products.length %> </h2>
+                    <h3 > Total Price : <%= total %> </h3>
+                </div>
+            </div>
             <div class="grid">
                 <% for(product of products){ %> 
                     <article class="card product-item">
@@ -24,7 +30,12 @@
                 </div>
                 <div class="card__actions">
                     <button type="button" class="btn"><a href="/productDetails/<%= product.id %>"> Details</a></button>
-                   <%- include('../includes/add-to-cart.ejs',{product}) %> 
+                  <form action="/remove-item" method="POST" >
+                <input type="text" style="display: none;" name="productId" value="<%= product.id %> ">
+                <button class="btn" type="submit">
+                    Remove
+                </button>
+                </form>
                 </div>
             </article>
             <% } %> 

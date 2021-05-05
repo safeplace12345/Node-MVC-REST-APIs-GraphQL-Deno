@@ -206,3 +206,7 @@ form {
     display: none;
   }
 }
+.cart-nav{
+  display: flex;
+  justify-content: space-around;
+}
