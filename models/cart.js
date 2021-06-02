@@ -1,23 +1,23 @@
 const ProductModel = require("./product");
 const fs = require("fs");
 const pathMaker = require("../utils/pathMaker");
-const deleteById = require('../utils/deleteById')
-const fileReader = require('../utils/readFiles')
+const deleteById = require("../utils/deleteById");
+const fileReader = require("../utils/readFiles");
 const initialCart = { products: [], totalPrice: 0 };
 const file = pathMaker("cart.json");
 
 const Cart = () => {
   const readFile = (cb) => {
-    return fileReader.cart(initialCart,file,cb)
+    return fileReader.cart(initialCart, file, cb);
   };
 
   const getFullCart = (cb) => {
     return readFile((cart) => {
       let cartItems = cart.products.map((item) => item.id.toString());
       let addedItems = [];
-      let total = cart.totalPrice
-      ProductModel.fetchAllProducts((products) => {
-        addedItems = products.filter((prod) => cartItems.indexOf(prod.id) > -1);
+      let total = cart.totalPrice;
+      return ProductModel.fetchAllProducts().then((products) => {
+        addedItems = products[0].filter((prod) => cartItems.indexOf(prod.id.toString()) > -1);
         return cb(addedItems,total);
       });
     });
@@ -49,13 +49,13 @@ const Cart = () => {
       writeFile(cart);
     });
   };
-  const deleteItem = id => {
-    return deleteById(id,readFile,writeFile)
-  }
+  const deleteItem = (id) => {
+    return deleteById(id, readFile, writeFile);
+  };
   return {
     addItem,
     getFullCart,
-    deleteItem
+    deleteItem,
   };
 };
 module.exports = Cart;

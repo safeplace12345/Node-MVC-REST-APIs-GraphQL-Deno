@@ -33,29 +33,24 @@ const editProductsPage = (req, res, next) => {
 };
 
 const getAllAdminProducts = (req, res, next) => {
-  ProductModel.fetchAllProducts(products => {
-        return res.render("admin/productsList", {
-          pageTitle: "Admin Products",
-          path: "/admin/productsList",
-          products
-        })})}
-  // return ProductModel.fetchAllProducts()
-  //   .then((response) => {
-  //     return res.render("admin/productsList", {
-  //       pageTitle: "Admin Products",
-  //       path: "/admin/productsList",
-  //       products: response[0]
-  //     });
-  //   })
-  //   .catch((err) => {
-  //     return res.render("admin/productsList", {
-  //       pageTitle: "Admin Products",
-  //       path: "/admin/productsList",
-  //       products: []
-  //     });
-  //   });
+  return ProductModel.fetchAllProducts()
+    .then((response) => {
+      return res.render("admin/productsList", {
+        pageTitle: "Admin Products",
+        path: "/admin/productsList",
+        products: response[0]
+      });
+    })
+    .catch((err) => {
+      console.log(err)
+      return res.render("admin/productsList", {
+        pageTitle: "Admin Products",
+        path: "/admin/productsList",
+        products: []
+      });
+    });
 
-
+  }
 
 const editProductPage = (req,res,next)=>{
   const Product = ProductModel.Product;

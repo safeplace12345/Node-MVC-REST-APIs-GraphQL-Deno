@@ -7,7 +7,7 @@ const rootDir = require('./utils/path')
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 const errorControllers = require('./controllers/error')
-const db = require('./utils/database')
+const { sequelize } = require('./utils/database')
 
 
 server.set('view engine' , 'ejs');
@@ -20,6 +20,10 @@ server.use(express.static(path.join(rootDir, 'public')));
 server.use("/admin", adminRoutes.router);
 server.use(shopRoutes);
 server.use(errorControllers.get404Page);
-
+sequelize
+  .sync()
+  .then((res) => {
+      server.listen(3000)})
+  .catch((err) => console.log('Database Error Mate :('));
+  
 // Listener
-server.listen(3000);
