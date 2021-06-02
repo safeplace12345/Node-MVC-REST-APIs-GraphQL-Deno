@@ -1,7 +1,7 @@
 const fs = require("fs");
 const pathMaker = require('../utils/pathMaker')
 const fileReader = require('../utils/readFiles')
-const database = require('../utils/database')
+const {mongoConnect} = require('../utils/database')
 
 const file = pathMaker("products.json");
 const readProductsFile = (cb) => {
@@ -25,6 +25,10 @@ const writeFile = content => fs.writeFile(file,JSON.stringify(content),err => {
   console.log(err);
 })
 
+// Initiate the database 
+
+
+
 class Product {
   constructor({ title, image, price, description }) {
     (this.title = title.trim()),
@@ -34,23 +38,12 @@ class Product {
       this.id = null;
     }
     save() {
-      this.id = Math.floor(Math.random() * 1000).toString();
-      return readProductsFile((products) => {
-        products.push(this);
-        writeFile(products);
-    });
+      return mongoConnect(_db => {
+        return _db.collection('shop').insertOne(this).then(res => console.log(res)).catch(err => console.log(err))
+      })
   }
   edit(id){
-    return readProductsFile((products => {
-      const existingItemIndex = products.findIndex(prod => +prod.id == +id);
-      this.id = id.trim()
-      console.log(existingItemIndex)
-      const updatedProducts = [...products];
-      updatedProducts[existingItemIndex] = this
-      writeFile(updatedProducts)
-    }
-    )
-    )
+    
   }
 }
 const deleteProductFromFile = (id,cb) => {

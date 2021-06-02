@@ -10,6 +10,7 @@ const errorControllers = require('./controllers/error')
 const db = require('./utils/database')
 
 
+const {mongoConnect} = require('./utils/database')
 server.set('view engine' , 'ejs');
 server.set('views', 'views')
 // Body parser
@@ -18,8 +19,10 @@ server.use(bodyParser.urlencoded({ extended: false }));
 server.use(express.static(path.join(rootDir, 'public')));
  // Routing
 server.use("/admin", adminRoutes.router);
-server.use(shopRoutes);
-server.use(errorControllers.get404Page);
-
+// server.use(shopRoutes);
+// server.use(errorControllers.get404Page);
 // Listener
-server.listen(3000);
+mongoConnect((client) => {
+    server.listen(3000);
+    return 
+} )
