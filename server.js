@@ -23,6 +23,5 @@ server.use("/admin", adminRoutes.router);
 // server.use(errorControllers.get404Page);
 // Listener
 mongoConnect((client) => {
-    server.listen(3000);
-    return 
-} )
+  return server.listen(3000);
+});

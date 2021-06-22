@@ -20,15 +20,15 @@ let _db;
 // connect our backend to the database
 const mongoConnect = async (callback) =>
   MongoClient.connect(
-    "mongodb+srv://ghostxp:selassie123@ghost-db.9i0m7.mongodb.net/bookShop?retryWrites=true&w=majority",
+    "mongodb+srv://ghostxp:selassie123@ghost-db.9i0m7.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
     { useUnifiedTopology: true, useNewUrlParser: true }
   )
     .then((client) => {
       console.log("connection to mongodb was successful : )");
       _db = client.db();
-      return callback(_db)
+      return callback(_db);
     })
-    .catch((err) => console.log("connection to mongodb was successful : )"));
+    .catch((err) => console.log("connection to mongodb was unsuccessful :("));
 
 // create a connection to the database client if any
 const getDb = () => {
