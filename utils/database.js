@@ -1,4 +1,6 @@
+require('dotenv').config()
 // const mysql = require('mysql2')
+
 
 // const pool = mysql.createPool({
 //   host: "localhost",
@@ -12,7 +14,6 @@
 const mongodb = require("mongodb");
 
 const { MongoClient } = mongodb;
-
 // init database
 
 let _db;
@@ -20,7 +21,7 @@ let _db;
 // connect our backend to the database
 const mongoConnect = async (callback) =>
   MongoClient.connect(
-    "mongodb+srv://ghostxp:selassie123@ghost-db.9i0m7.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
+    "mongodb+srv://ghostxp:"+ process.env.DB-PWD + "@ghost-db.9i0m7.mongodb.net/bookShop?retryWrites=true&w=majority",
     { useUnifiedTopology: true, useNewUrlParser: true }
   )
     .then((client) => {
