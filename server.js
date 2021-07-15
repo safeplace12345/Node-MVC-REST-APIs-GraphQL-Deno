@@ -14,12 +14,15 @@ const {mongoConnect,getDb} = require('./utils/database')
 
 
 const userMidWare = async (req,res,next) =>{
-    let userCreds = (req.query.name)
-    const strLength = userCreds.length;
-    userCreds = userCreds.substr(0,1).toUpperCase() + userCreds.substr(1,strLength - 1)
-    let _db =await getDb().collection('users')
-    const user = await _db.findOne({name : userCreds})
-    req.body.user = user
+    if(req.query.name){
+        let userCreds = (req.query.name)
+        console.log(userCreds)
+        const strLength = userCreds.length;
+        userCreds = userCreds.substr(0,1).toUpperCase() + userCreds.substr(1,strLength - 1)
+        let _db =await getDb().collection('users')
+        const user = await _db.findOne({name : userCreds})
+        req.body.user = user
+    }
     return next()
 } 
 server.set('view engine' , 'ejs');

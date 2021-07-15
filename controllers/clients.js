@@ -1,11 +1,13 @@
-// const Cart = require('../models/cart')
+const Cart = require('../models/cart')
 const ProductModel = require("../models/product").Product
 const renderProductsPage = (req, res, next) => {
  return ProductModel.fetchAllProducts((products) => {
-   return res.render("clients/shop", {
+  //  console.log(products,req.body.user)
+  return res.render("clients/shop", {
      pageTitle: "Shop",
-     path: "/",
+     path: "/clients/",
      products,
+     userId : req.body.user._id
    });
  });
 
@@ -38,25 +40,26 @@ const renderProdDetailsPage = (req,res,next) => {
 }
 
 const renderCartPage = (req, res, next) => {
- return Cart().getFullCart((cart,total) => {
+  return Cart().getFullCart((cart,total) => {
     return res.render("clients/cart", {
        pageTitle: "Your Cart",
        path: "/cart",
        products : cart,
        total : +total.toFixed(2)
      });
-  })
+  },req.body.user)
 };
 
 const addToCart = (req, res, next) => {
+  let userName = req.query.user
   const proId = (req.body.proID);
   const proPrice = req.body.proPrice;
   const arg = { id: +proId, qty: 1  ,price : +proPrice };
   let cart = Cart()
-  cart.addItem(arg)
-  cart.getFullCart((cart,total) => {
-    res.redirect("/cart");
-  } )
+  cart.addItem(arg,userName)
+  // cart.getFullCart((cart,total) => {
+  //   res.redirect("/clients/cart");
+  // } )
 };
 const renderCheckoutPage = (req, res, next) => {
  return res.render("clients/checkout", {
