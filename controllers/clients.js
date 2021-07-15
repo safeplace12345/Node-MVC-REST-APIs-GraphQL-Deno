@@ -1,5 +1,5 @@
-const Cart = require('../models/cart')
-const ProductModel = require("../models/product");
+// const Cart = require('../models/cart')
+const ProductModel = require("../models/product").Product
 const renderProductsPage = (req, res, next) => {
  return ProductModel.fetchAllProducts((products) => {
    return res.render("clients/shop", {

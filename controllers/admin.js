@@ -1,4 +1,4 @@
-const ProductModel = require("../models/product").Product
+const ProductModel = require("../models/product")
 const getAddProductsPage = (req, res, next) => {
   res.render("admin/add-product", {
     pageTitle: "Add-Product",
@@ -8,10 +8,10 @@ const getAddProductsPage = (req, res, next) => {
 };
 
 const postProductsPage = (req, res, next) => {
-  const Product = ProductModel.Product;
-  const product = new Product(JSON.parse(JSON.stringify(req.body)));
-  product.save();
-  res.redirect("/");
+  let pM = ProductModel.Product
+  const product = new pM(req.body);
+  product.saveOrUpdate();
+  res.redirect("/clients/");
 };
 const editProductsPage = (req, res, next) => {
   const prodID = req.params.prodID;

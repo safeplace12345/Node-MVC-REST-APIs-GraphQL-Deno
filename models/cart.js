@@ -6,6 +6,8 @@ const fileReader = require('../utils/readFiles')
 const initialCart = { products: [], totalPrice: 0 };
 const file = pathMaker("cart.json");
 
+
+
 const Cart = () => {
   const readFile = (cb) => {
     return fileReader.cart(initialCart,file,cb)

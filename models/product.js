@@ -1,8 +1,8 @@
 const fs = require("fs");
 const pathMaker = require('../utils/pathMaker')
 const fileReader = require('../utils/readFiles')
-const { mongoConnect , getDb } = require('../utils/database')
-
+const { mongoConnect, getDb } = require('../utils/database')
+const ObjectId = require('mongodb').ObjectID
 const file = pathMaker("products.json");
 const readProductsFile = (cb) => {
   return fileReader.products(cb, file)
@@ -25,36 +25,36 @@ const writeFile = content => fs.writeFile(file, JSON.stringify(content), err => 
 
 
 class Product {
-  constructor({ title, image, price, description }) {
+  constructor({ title, image, price, description, id }) {
     (this.title = title.trim()),
       (this.image = image.trim()),
       (this.price = +price),
       (this.description = description.trim());
-    this.id = null;
+    this.id = id;
   }
-  save() {
-    return mongoConnect(_db => {
-      return _db.collection('shop').insertOne(this).then(res => console.log(res)).catch(err => console.log(err))
-    })
+  saveOrUpdate() {
+    let db = getDb()
+    let dbOp = db.collection('shop')
+      if (!this.id) {
+        return dbOp.insertOne(this).then(res => console.log(res)).catch(err => console.log(err))
+      }
+      return dbOp.updateOne({ _id: new ObjectId(this.id) }, { $set: this })
+    
   }
   static fetchAllProducts(cb) {
     let db = getDb()
-    return db.collection('shop').find({}).toArray((err,res)=> {
-      if(err) return cb(err)
+    return db.collection('shop').find({}).toArray((err, res) => {
+      if (err) return cb(err)
       cb(res)
     })
-    };
+  };
   edit(id) {
 
   }
 }
 const deleteProductFromFile = (id, cb) => {
-  return readProductsFile(products => {
-    let updatedProducts = products.filter((product) => +product.id !== +id);
-    // fix delete from cart as well
-    writeFile(updatedProducts);
-    return cb(updatedProducts)
-  })
+  let db = getDb()
+  return ldb.collection('shop').deleteOne({ id: new ObjectId(id) }).then(res => cb(res)).catch(err => cb(err))
 }
 
 module.exports = {
