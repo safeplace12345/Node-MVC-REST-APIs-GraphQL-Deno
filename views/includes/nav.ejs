@@ -1,10 +1,12 @@
-    <header class="main-header">
+
+
+<header class="main-header">
       <nav class="main-header__nav">
         <ul class="main-header__item-list">
           <!-- clients -->
-          <li class="main-header__item"><a class='<%= path === '/clients/index' ? "active" : ""  %> ' href="/clients/index">Home</a></li>
+          <li class="main-header__item"><a class='<%= path === '/clients/index' ? "active" : ""  %> ' href="/clients/index/?name=<%=userName%>">Home</a></li>
           <li class="main-header__item"><a class='<%= path === '/clients/' ? "active" : ""  %> ' href="/clients/">Shop</a></li>
-          <li class="main-header__item"><a class='<%= path === '/clients/cart' ? "active" : ""  %> ' href="/clients/cart">Cart</a></li>
+          <li class="main-header__item"><a class='<%= path === '/clients/cart' ? "active" : ""  %> ' href="/clients/cart?name=<%=userName%>">Cart</a></li>
           <li class="main-header__item"><a class='<%= path === '/clients/checkout' ? "active" : ""  %> ' href="/clients/checkout">Checkout</a></li>
           <li class="main-header__item"><a class='<%= path === '/clients/admin/add-product' ? "active" : "" %>'  href="/admin/add-product">Add Product</a></li>
           <li class="main-header__item"><a class='<%= path === '/clients/admin/productsList' ? "active" : "" %>'  href="/admin/productsList">All Product</a></li>

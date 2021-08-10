@@ -1,115 +1,97 @@
-const Cart = require('../models/cart')
-const ProductModel = require("../models/product").Product
-const renderProductsPage = (req, res, next) => {
- return ProductModel.fetchAllProducts((products) => {
-  //  console.log(products,req.body.user)
-  return res.render("clients/shop", {
-     pageTitle: "Shop",
-     path: "/clients/",
-     products,
-     userId : req.body.user._id
-   });
- });
+const { LocalStorage } = require("node-localstorage");
 
-  //  return ProductModel.fetchAllProducts()
-//    .then((response) => {
-//      return res.render("clients/shop", {
-//        pageTitle: "SHOP",
-//        path: "/",
-//        products: response[0],
-//      });
-//    })
-//    .catch((err) => {
-//      return res.render("clients/shop", {
-//        pageTitle: "SHOP",
-//        path: "/",
-//        products: [],
-//      });
-//    });
+const Cart = require("../models/cart");
+const ProductModel = require("../models/product").Product;
+const localStorage = new LocalStorage("./scratch");
+
+const userName = localStorage.getItem("userName");
+const renderProductsPage = (req, res, next) => {
+    return ProductModel.fetchAllProducts((products) => {
+        return res.render("clients/shop", {
+            pageTitle: "Shop",
+            path: "/clients/",
+            products,
+            userId: userName.toLowerCase(),
+            userName,
+        });
+    });
 };
 
-const renderProdDetailsPage = (req,res,next) => {
-  const productId = req.params.productId;
-  return ProductModel.fetchProduct(productId, (product) => {
-   return res.render('clients/productDetails',{
-     pageTitle : product.id,
-     path: product.id,
-     product
-   })
-  })
-}
+const renderProdDetailsPage = (req, res, next) => {
+    const productId = req.params.productId;
+    return ProductModel.fetchSingleProduct(productId, (product) => {
+        return res.render("clients/productDetails", {
+            pageTitle: product.id,
+            path: product.id,
+            product,
+            userName,
+            userId : userName.toLowerCase()
+        });
+    });
+};
 
 const renderCartPage = (req, res, next) => {
-  return Cart().getFullCart((cart,total) => {
-    return res.render("clients/cart", {
-       pageTitle: "Your Cart",
-       path: "/cart",
-       products : cart,
-       total : +total.toFixed(2)
-     });
-  },req.body.user)
+    Cart().getFullCart(userName, (cart,total) => {
+        return res.render("clients/cart", {
+          pageTitle: "Your Cart",
+          path: "/cart",
+          products : cart,
+          total : total.toFixed(2),
+          userName
+        });
+
+    });
+
 };
 
 const addToCart = (req, res, next) => {
-  let userName = req.query.user
-  const proId = (req.body.proID);
-  const proPrice = req.body.proPrice;
-  const arg = { id: +proId, qty: 1  ,price : +proPrice };
-  let cart = Cart()
-  cart.addItem(arg,userName)
-  // cart.getFullCart((cart,total) => {
-  //   res.redirect("/clients/cart");
-  // } )
+    Cart().addItem(req.body, userName,(response) => {
+
+      if(response.includes('Error')) return res.redirect('/404')
+
+       return res.redirect("/clients/cart");
+
+    });
+
 };
 const renderCheckoutPage = (req, res, next) => {
- return res.render("clients/checkout", {
-    pageTitle: "Checkout",
-    path: "/checkout",
-  });
+    return res.render("clients/checkout", {
+        pageTitle: "Checkout",
+        path: "/checkout",
+    });
 };
 
 const renderHomePage = (req, res, next) => {
-  return ProductModel.fetchAllProducts(products => {
-    return res.render("clients/index", {
-       pageTitle: "Home",
-       path: "/index",
-       products
-     });
-
-  })
-  // .then(
-  //   response => {
-  //   }
-  //   ).catch(
-  //     err => {
-  //  return res.render("clients/index", {
-  //     pageTitle: "Home",
-  //     path: "/index",
-  //     products: [0],
-  //   });
-
-  // }
-  // );
+    const userName = localStorage.getItem("userName");
+    return ProductModel.fetchAllProducts((products) => {
+        return res.render("clients/index", {
+            pageTitle: "Home",
+            path: "/index",
+            products,
+            userId: req.body.user._id,
+            userName,
+        });
+    });
 };
 const renderOrdersPage = (req, res, next) => {
- return res.render("clients/orders", {
-    pageTitle: "Orders",
-    path: "/orders",
-  });
+    return res.render("clients/orders", {
+        pageTitle: "Orders",
+        path: "/orders",
+    });
 };
 const removeItem = (req, res, next) => {
-  let item = req.body.productId
-  Cart().deleteItem(item)
- return res.redirect('/cart');
+    let id = req.body.productId;
+    Cart().deleteItem(id);
+    // return res.redirect("/cart");
 };
 
 module.exports = {
-  renderProductsPage,
-  renderCartPage,
-  renderCheckoutPage,
-  renderHomePage,
-  renderOrdersPage,
-  renderProdDetailsPage,
-  addToCart,
-  removeItem
+    renderProductsPage,
+    renderCartPage,
+    renderCheckoutPage,
+    renderHomePage,
+    renderOrdersPage,
+    renderProdDetailsPage,
+    addToCart,
+    removeItem,
 };
