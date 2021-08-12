@@ -39,6 +39,7 @@ server.set("view engine", "ejs");
 server.set("views", "views");
 // Body parser
 server.use(bodyParser.urlencoded({ extended: false }));
+
 // Static files( css,js,images) middleware
 server.use(express.static(path.join(rootDir, "public")));
 // Routing

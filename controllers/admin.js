@@ -1,6 +1,7 @@
 const { LocalStorage } = require("node-localstorage");
 
 const ProductModel = require("../models/product").Product;
+const Cart = require("../models/cart")
 const localStorage = new LocalStorage("./scratch");
 
 const userName = localStorage.getItem("userName");
@@ -15,8 +16,7 @@ const getAddProductsPage = (req, res, next) => {
 };
 
 const postProductsPage = (req, res, next) => {
-    let pM = ProductModel.Product;
-    const product = new pM(req.body);
+    const product = new ProductModel(req.body);
    return product.saveOrUpdate(response => {
       if(response.includes('Error')) return res.redirect('404')
 
@@ -71,10 +71,13 @@ const editProductPage = (req, res, next) => {
 };
 const deleteProduct = (req, res, next) => {
     const id = req.body.productID;
-    ProductModel.deleteById(id, (response) => {
+    return ProductModel.deleteById(id, (response) => {
         if(response.includes('Error')) return res.redirect('404')
-
-        res.redirect("/clients/");
+            return Cart().deleteById(id,userName,(response) => {
+                console.log(response)
+                if(response.includes("Error"))return res.redirect('404')
+               return res.redirect("/clients/");
+            })
     });
 };
 

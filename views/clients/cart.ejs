@@ -39,6 +39,11 @@
                 </div>
             </article>
             <% } %>
+            <div class="centered">
+                <form action="/clients/createorder/?user=<%=userName%>" method="POST">
+                    <button type="submit" class="btn">Order Now!</button>
+                </form>
+            </div>
         </div>
         <% } else { %>
             <h4>No Products Yet !!!</h4>

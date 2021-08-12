@@ -12,13 +12,9 @@ const file = pathMaker("cart.json");
 // Database conn
 let _db;
 const Cart = () => {
-    const readFile = (cb) => {
-        return fileReader.cart(initialCart, file, cb);
-    };
-
     const getFullCart = async (userName, cb) => {
         _db = await getDb().collection("users");
-        const user = await _db.findOne({ name: userName });
+        let user = await _db.findOne({ name: userName });
         // Get cart
         const { cart } = await user;
         // Modify cart for Ui reasons
@@ -35,20 +31,17 @@ const Cart = () => {
                     productIDs.includes(_id.toString())
                 );
                 // Calculate total price for all items
-                let total = cartItems.reduce((acc, curr) => {
-                    return acc + curr.price;
+                let total = cart.reduce((accum, curr) => {
+                    return accum + +curr.proPrice * curr.qty;
                 }, 0);
 
-                return cb(cartItems,total);
+                return cb(cartItems, total);
             });
     };
-    const writeFile = (data) => {
-        return fs.writeFile(file, JSON.stringify(data), (err) => {
-            console.log(err);
-        });
-    };
+
     const addItem = async (product, userName, cb) => {
         _db = await getDb().collection("users");
+        // Find User cart
         let userCart = await _db.findOne({ name: userName });
         // update cart now
         let cart = await userCart.cart;
@@ -70,14 +63,14 @@ const Cart = () => {
                 return cb("Inserting new item");
             } catch (e) {
                 console.log(e);
-                cb("Error inserting new item");
+                return cb("Error inserting new item");
             }
         }
         // Update existing Product
         else {
             try {
                 item = { ...trimedProduct, qty: userCart.cart[exists].qty + 1 };
-                cart = [...cart, item];
+                cart[exists] = item;
                 _db.updateOne({ name: userName }, { $set: { cart } });
                 return cb("Updating existing item");
             } catch (error) {
@@ -85,13 +78,40 @@ const Cart = () => {
             }
         }
     };
-    const deleteItem = (id) => {
-        console.log(id)
+    const deleteById = async (id, userName, cb) => {
+        _db = await getDb().collection("users");
+        // Trim Id
+        id = id.trim();
+        // Find Users cart
+        let user = await _db.findOne({ name: userName });
+        let { cart } = user;
+        // Clean or remove item
+        cart = cart.filter((item) => item.proID !== id);
+        try {
+            _db.updateOne({ name: userName }, { $set: { cart } });
+            return cb(`Success deleting from ${userName} cart`);
+        } catch (error) {
+            return cb(`Error deleting from ${userName} cart`);
+        }
+    };
+    const emptyCart = async (user, cb) => {
+        _db = await getDb().collection("users");
+        user = await _db.findOne({ _id: new ObjectID('60f06914ea986f80606790a0') });
+        let cart = user.cart;
+        //Empty cart after placing order
+        console.log(cart)
+        cart = []
+        console.log(cart)
+        return await _db
+            .updateOne({ _id: new ObjectID('60f06914ea986f80606790a0') }, { $set: {cart} })
+            .then((res) => console.log(res))
+            .catch((err) => console.log("Error"));
     };
     return {
         addItem,
         getFullCart,
-        deleteItem,
+        deleteById,
+        emptyCart,
     };
 };
 module.exports = Cart;
