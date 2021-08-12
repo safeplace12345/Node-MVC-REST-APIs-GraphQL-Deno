@@ -13,6 +13,17 @@ class Orders {
             .then((res) => cb("Success"))
             .catch((err) => cb("Error"));
     }
+   static getAllOrders(cb) {
+        let _db = getDb();
+        return _db
+            .collection("orders")
+            .find({})
+            .toArray((err, res) => {
+                if (err) return cb([]);
+
+                return cb(res);
+            });
+    }
 }
 
-module.exports = Orders
+module.exports = Orders;

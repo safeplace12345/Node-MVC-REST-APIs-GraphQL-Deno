@@ -11,7 +11,7 @@ router.get('/cart',clientController.renderCartPage)
 
 router.post('/createorder',clientController.renderCheckoutPage)
 router.get('/index',clientController.renderHomePage)
-// router.get('/orders',clientController.renderOrdersPage)
+router.get('/orders',clientController.renderOrdersPage)
 router.get("/productDetails/:productId",clientController.renderProdDetailsPage)
 // router.post('/remove-item',clientController.removeItem)
 module.exports = router;

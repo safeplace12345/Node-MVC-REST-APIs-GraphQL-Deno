@@ -63,7 +63,7 @@ const renderCheckoutPage = (req, res, next) => {
             Cart().emptyCart(userName, (response) => {
                 if (response.includes("Error")) return res.redirect("404");
                 // redirect
-                return res.redirect('/clients/cart');
+                return res.redirect("/clients/cart");
             });
         });
     });
@@ -82,11 +82,16 @@ const renderHomePage = (req, res, next) => {
     });
 };
 const renderOrdersPage = (req, res, next) => {
-    return res.render("clients/orders", {
-        pageTitle: "Orders",
-        path: "/orders",
+    Orders.getAllOrders((response) => {
+        return res.render("clients/orders", {
+            pageTitle: "Orders",
+            path: "/orders",
+            orders : response,
+            userName,
+        });
     });
 };
+
 const removeItem = (req, res, next) => {
     let id = req.body.productId;
     Cart().deleteItem(id);

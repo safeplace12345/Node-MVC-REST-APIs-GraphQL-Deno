@@ -99,13 +99,11 @@ const Cart = () => {
         user = await _db.findOne({ _id: new ObjectID('60f06914ea986f80606790a0') });
         let cart = user.cart;
         //Empty cart after placing order
-        console.log(cart)
         cart = []
-        console.log(cart)
         return await _db
             .updateOne({ _id: new ObjectID('60f06914ea986f80606790a0') }, { $set: {cart} })
-            .then((res) => console.log(res))
-            .catch((err) => console.log("Error"));
+            .then((res) => cb("Success"))
+            .catch((err) => cb("Error"));
     };
     return {
         addItem,
