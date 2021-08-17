@@ -20,7 +20,6 @@ class Orders {
             .find({})
             .toArray((err, res) => {
                 if (err) return cb([]);
-
                 return cb(res);
             });
     }

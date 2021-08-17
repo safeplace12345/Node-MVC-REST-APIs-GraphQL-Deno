@@ -4,14 +4,7 @@ const fileReader = require("../utils/readFiles");
 const { mongoConnect, getDb } = require("../utils/database");
 const ObjectId = require("mongodb").ObjectID;
 const file = pathMaker("products.json");
-const readProductsFile = (cb) => {
-    return fileReader.products(cb, file);
-};
 
-const writeFile = (content) =>
-    fs.writeFile(file, JSON.stringify(content), (err) => {
-        console.log(err);
-    });
 
 // Initiate the database
 

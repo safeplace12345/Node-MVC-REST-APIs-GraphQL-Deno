@@ -53,7 +53,7 @@ const addToCart = (req, res, next) => {
 const renderCheckoutPage = (req, res, next) => {
     const userName = req.query.user;
 
-    return Cart().getFullCart(userName, (cart, total) => {
+    return Cart().getOrders(userName, (cart, total) => {
         // Create an order
         const order = new Orders(cart, userName);
         // Save the order

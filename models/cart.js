@@ -38,6 +38,14 @@ const Cart = () => {
                 return cb(cartItems, total);
             });
     };
+    const getOrders = async (userName,cb) => {
+        _db = await getDb().collection("users");
+        let user = await _db.findOne({ name : userName});
+        let {name , cart} =await user
+
+        cart.map(item => item.user = name)
+        return cb(cart);
+    };
 
     const addItem = async (product, userName, cb) => {
         _db = await getDb().collection("users");
@@ -95,13 +103,24 @@ const Cart = () => {
         }
     };
     const emptyCart = async (user, cb) => {
+        // get user
         _db = await getDb().collection("users");
-        user = await _db.findOne({ _id: new ObjectID('60f06914ea986f80606790a0') });
+        user = await _db.findOne({
+            name: user,
+        });
+        //  Trim id
+        let {_id} = user
+        _id = new ObjectID(_id)
+        // get cart
         let cart = user.cart;
         //Empty cart after placing order
-        cart = []
+        cart = [];
+        // update cart
         return await _db
-            .updateOne({ _id: new ObjectID('60f06914ea986f80606790a0') }, { $set: {cart} })
+            .updateOne(
+                { _id},
+                { $set: { cart } }
+            )
             .then((res) => cb("Success"))
             .catch((err) => cb("Error"));
     };
@@ -110,6 +129,7 @@ const Cart = () => {
         getFullCart,
         deleteById,
         emptyCart,
+        getOrders
     };
 };
 module.exports = Cart;
