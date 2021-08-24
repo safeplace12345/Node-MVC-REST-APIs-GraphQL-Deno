@@ -1,7 +1,7 @@
 const { LocalStorage } = require("node-localstorage");
 
-const ProductModel = require("../models/product").Product;
-const Cart = require("../models/cart")
+const Product = require("../models/product");
+const Cart = require("../models/cart");
 const localStorage = new LocalStorage("./scratch");
 
 const userName = localStorage.getItem("userName");
@@ -16,12 +16,18 @@ const getAddProductsPage = (req, res, next) => {
 };
 
 const postProductsPage = (req, res, next) => {
-    const product = new ProductModel(req.body);
-   return product.saveOrUpdate(response => {
-      if(response.includes('Error')) return res.redirect('404')
-
-     return res.redirect("/clients/");
-    });
+    const { _id } = req.user;
+    const { title, image, price, description } = req.body;
+    // create new product
+    const product = Product({ title, image, price, description, user: _id });
+    // save product
+    return product
+        .save()
+        .then((response) => {
+            console.log("Successfully saved new product");
+            return res.redirect("/clients/");
+        })
+        .catch((err) => console.log("Error saving product", err));
 };
 const editProductsPage = (req, res, next) => {
     const prodID = req.params.prodID;
@@ -30,55 +36,71 @@ const editProductsPage = (req, res, next) => {
     if (!editMode) {
         return res.redirect("/404");
     }
-
-    ProductModel.fetchSingleProduct(prodID, (product) => {
-        if (!product) {
-            return res.redirect("/404");
-        }
-        return res.render("admin/add-product", {
-            pageTitle: "Add-Product",
-            path: "/admin/add-product",
-            editMode,
-            product,
-            userName,
-        });
-    });
+    Product.find({ _id: prodID })
+        .then((product) => {
+            if (!product) {
+                return res.redirect("/404");
+            }
+            return res.render("admin/add-product", {
+                pageTitle: "Add-Product",
+                path: "/admin/add-product",
+                editMode,
+                product: product[0],
+                userName,
+            });
+        })
+        .catch((err) => console.log("Product not found", err));
 };
 
 const getAllAdminProducts = (req, res, next) => {
-    let pM = ProductModel;
-    return pM.fetchAllProducts((products) => {
-        return res.render("admin/productsList", {
-            pageTitle: "Admin Products",
-            path: "/admin/productsList",
-            products,
-            userName,
-        });
-    });
+    return Product.find()
+        // .select("title image price -_id") // Used to select fields . Note :: **-** removes the id field
+        // .populate("user", "name email address -_id") // Used to populate reffrenced fields .
+        .then((products) => {
+            console.log(products);
+            res.render("admin/productsList", {
+                pageTitle: "Admin Products",
+                path: "/admin/productsList",
+                products,
+                userName,
+            });
+        })
+        .catch((err) => console.log("Error finding products", err));
 };
 
 const editProductPage = (req, res, next) => {
-    let pM = ProductModel;
-    // Note Objects will contain an _id field after creation
-    const updatedProduct = new ProductModel(
-        JSON.parse(JSON.stringify(req.body))
+    let { id, title, image, description, price } = JSON.parse(
+        JSON.stringify(req.body)
     );
-    return updatedProduct.saveOrUpdate((response) => {
-        if (response.includes("Error")) return res.redirect("/404");
 
-        return res.redirect("admin/productsList");
-    });
+    id = id.trim();
+    // Note Objects will contain an _id field after creation
+    return Product.findByIdAndUpdate(
+        { _id: id },
+        { title, image, description, price },
+        (err, response) => {
+            if (err) return console.log("Error updating product", err);
+            console.log("Succesfully updating product");
+            return res.redirect("/admin/productsList");
+        }
+    );
 };
 const deleteProduct = (req, res, next) => {
-    const id = req.body.productID;
-    return ProductModel.deleteById(id, (response) => {
-        if(response.includes('Error')) return res.redirect('404')
-            return Cart().deleteById(id,userName,(response) => {
-                console.log(response)
-                if(response.includes("Error"))return res.redirect('404')
-               return res.redirect("/clients/");
-            })
-    });
+    let id = req.body.productID;
+    id = id.trim();
+    return Product.findByIdAndRemove(id)
+        .then((response) => {
+            return res.redirect("/clients/");
+            // Delete from cart
+            return Cart().deleteById(id, userName, (response) => {
+                console.log(response);
+                if (response.includes("Error")) return;
+            });
+        })
+        .catch((err) => {
+            console.log(err);
+            res.redirect("404");
+        });
 };
 
 module.exports = {
