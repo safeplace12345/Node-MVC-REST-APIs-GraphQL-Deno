@@ -10,6 +10,7 @@ const rootDir = require("./utils/path");
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 const errorControllers = require("./controllers/error");
+const authRoutes = require("./routes/auth");
 
 const User = require("./models/users");
 
@@ -25,7 +26,8 @@ const userMidWare = async (req, res, next) => {
             userCreds.substr(1, strLength - 1);
         // Create user
 
-      return await User.findById("611cf85da8861d6014ea6142")
+
+        return await User.findById("611cf85da8861d6014ea6142")
             .then((user) => {
                 // Validate user
                 if (!user) {
@@ -60,6 +62,7 @@ server.use(express.static(path.join(rootDir, "public")));
 // Routing
 server.use("/admin", userMidWare, adminRoutes.router);
 server.use("/clients", userMidWare, shopRoutes);
+server.use(authRoutes);
 server.use(errorControllers.get404Page);
 // Listener
 mongoose

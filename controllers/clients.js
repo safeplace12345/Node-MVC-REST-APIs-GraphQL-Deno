@@ -7,6 +7,9 @@ const localStorage = new LocalStorage("./scratch");
 
 const userName = localStorage.getItem("userName");
 const renderProductsPage = (req, res, next) => {
+  // get cookie-->true
+  req.isLoggedin = (req.get('Cookie').split('=')[1])
+
     return Product.find()
         .then((products) =>
             res.render("clients/shop", {
@@ -15,12 +18,17 @@ const renderProductsPage = (req, res, next) => {
                 products,
                 userId: userName.toLowerCase(),
                 userName,
+                isAuthenticated : req.isLoggedin
             })
         )
         .catch((err) => console.log("Error finding products", err));
-};
+
+    };
 
 const renderProdDetailsPage = (req, res, next) => {
+     // get cookie-->true
+     req.isLoggedin = (req.get('Cookie').split('=')[1])
+
     const productId = req.params.productId;
     return Product.findById(productId)
         .then((product) => {
@@ -30,12 +38,16 @@ const renderProdDetailsPage = (req, res, next) => {
                 product,
                 userName,
                 userId: userName.toLowerCase(),
+                isAuthenticated : req.isLoggedin
             });
         })
         .catch((err) => console.log("Error finding products", err));
 };
 
 const renderCartPage = (req, res, next) => {
+  // get cookie-->true
+  req.isLoggedin = (req.get('Cookie').split('=')[1])
+
     let user = req.user;
     user.populate("cart.item._id", "title image price")
         .execPopulate()
@@ -46,6 +58,7 @@ const renderCartPage = (req, res, next) => {
                 products: user.cart,
                 total: 100,
                 userName,
+                isAuthenticated : req.isLoggedin
             });
         });
     // Cart().getFullCart(userName, (cart, total) => {
@@ -92,6 +105,9 @@ const renderCheckoutPage = (req, res, next) => {
 };
 
 const renderHomePage = (req, res, next) => {
+  // get cookie-->true
+  req.isLoggedin = (req.get('Cookie').split('=')[1])
+
     const userName = localStorage.getItem("userName");
     return (
         Product.find()
@@ -104,11 +120,14 @@ const renderHomePage = (req, res, next) => {
                     products,
                     userId: req.user._id,
                     userName,
+                    isAuthenticated : req.isLoggedin
                 });
             })
     );
 };
 const renderOrdersPage = (req, res, next) => {
+     // get cookie-->true
+  req.isLoggedin = (req.get('Cookie').split('=')[1])
     Order.find({})
         .populate("cart.user", "name address email")
         .select("cart._id cart.qty")
@@ -119,6 +138,7 @@ const renderOrdersPage = (req, res, next) => {
                 path: "/orders",
                 orders: response,
                 userName,
+                isAuthenticated : req.isLoggedin
             });
         });
 };

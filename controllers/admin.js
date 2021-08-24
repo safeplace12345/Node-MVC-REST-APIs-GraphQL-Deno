@@ -7,11 +7,15 @@ const localStorage = new LocalStorage("./scratch");
 const userName = localStorage.getItem("userName");
 
 const getAddProductsPage = (req, res, next) => {
+  // get cookie-->true
+  req.isLoggedin = (req.get('Cookie').split('=')[1])
+
     res.render("admin/add-product", {
         pageTitle: "Add-Product",
         path: "/admin/add-product",
         editMode: false,
         userName,
+        isAuthenticated : req.isLoggedin
     });
 };
 
@@ -30,6 +34,9 @@ const postProductsPage = (req, res, next) => {
         .catch((err) => console.log("Error saving product", err));
 };
 const editProductsPage = (req, res, next) => {
+    // get cookie-->true
+    req.isLoggedin = (req.get('Cookie').split('=')[1])
+
     const prodID = req.params.prodID;
     const editMode = req.query.edit;
 
@@ -47,12 +54,18 @@ const editProductsPage = (req, res, next) => {
                 editMode,
                 product: product[0],
                 userName,
+                isAuthenticated : req.isLoggedin
+
             });
         })
         .catch((err) => console.log("Product not found", err));
 };
 
 const getAllAdminProducts = (req, res, next) => {
+  // get cookie-->true
+    req.isLoggedin = (req.get('Cookie').split('=')[1])
+
+
     return Product.find()
         // .select("title image price -_id") // Used to select fields . Note :: **-** removes the id field
         // .populate("user", "name email address -_id") // Used to populate reffrenced fields .
@@ -63,6 +76,8 @@ const getAllAdminProducts = (req, res, next) => {
                 path: "/admin/productsList",
                 products,
                 userName,
+                isAuthenticated : req.isLoggedin
+
             });
         })
         .catch((err) => console.log("Error finding products", err));
