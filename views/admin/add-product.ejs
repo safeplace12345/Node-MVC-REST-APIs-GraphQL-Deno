@@ -31,6 +31,7 @@
             </div>
 
             <input type="text" name="id" style="visibility: hidden;" value="<% if (editMode) { %> <%= product._id %> <% } %>">
+            <input type="text" value="<%=csrfToken%>" style="visibility: hidden;" name="_csrf">
 
             <button type="submit" class="btn "><% if (editMode) { %> Update Product <% } else { %>  Add Product <% } %> </button>
         </form>

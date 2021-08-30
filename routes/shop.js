@@ -1,17 +1,20 @@
 const express = require("express");
 const router = express.Router();
+
 const clientController = require('../controllers/clients')
+// Authentication middleware
+const isAuth = require('../middleware/is-auth')
 
 // Render shop route page
 router.get("/", clientController.renderProductsPage);
 //  // Render add to cart page
- router.post('/cart',clientController.addToCart)
+ router.post('/cart', isAuth ,clientController.addToCart)
 
-router.get('/cart',clientController.renderCartPage)
+router.get('/cart', isAuth ,clientController.renderCartPage)
 
-router.post('/createorder',clientController.renderCheckoutPage)
+router.post('/createorder', isAuth,clientController.postOrder)
 router.get('/index',clientController.renderHomePage)
-router.get('/orders',clientController.renderOrdersPage)
+router.get('/orders', isAuth ,clientController.renderOrdersPage)
 router.get("/productDetails/:productId",clientController.renderProdDetailsPage)
-router.post('/remove-item',clientController.removeItem)
+router.post('/remove-item', isAuth ,clientController.removeItem)
 module.exports = router;

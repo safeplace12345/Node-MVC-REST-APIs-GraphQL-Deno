@@ -4,6 +4,10 @@ const bodyParser = require("body-parser");
 const { LocalStorage } = require("node-localstorage");
 const mongoose = require("mongoose");
 const session = require("express-session");
+const MongoDBStore = require("connect-mongodb-session")(session);
+const csrf = require("csurf");
+const flash = require("connect-flash")
+
 
 const rootDir = require("./utils/path");
 const adminRoutes = require("./routes/admin");
@@ -13,50 +17,25 @@ const authRoutes = require("./routes/auth");
 const errorControllers = require("./controllers/error");
 const User = require("./models/users");
 
-const localStorage = new LocalStorage("./scratch");
+// Session store on mongodb
+
+const MONGO_URI =
+    "mongodb+srv://ghostxp:selassie123@ghost-db.9i0m7.mongodb.net/bookShop?retryWrites=true&w=majority";
+
+const store = new MongoDBStore({
+    uri: MONGO_URI, // conn url
+    collection: "sessions", // collection name
+});
+
+// Requests security
+const crsfProtection = csrf();
+
+// Main server
 const server = express();
 
-// Custom middleware
-const userMidWare = async (req, res, next) => {
-    // get username if it exists on the query already
-    let userCreds = "name=chris";
-    if (req.query.name) {
-        let userCreds = req.query.name;
-    } //Trim query for userName
-    const strLength = userCreds.length;
-    userCreds =
-        userCreds.substr(0, 1).toUpperCase() +
-        userCreds.substr(1, strLength - 1);
-    // Create user
-
-    return await User.findById("611cf85da8861d6014ea6142")
-        .then((user) => {
-            // Validate user
-            if (!user) {
-                let user = new User({
-                    name: userCreds,
-                    email: userCreds + "@gmail.com",
-                    address: "U.S.A",
-                    cart: [],
-                });
-                return user.save();
-            }
-        })
-        .then((result) => {
-            return User.findById("611cf85da8861d6014ea6142").then((user) => {
-                req.user = user;
-                if (localStorage) {
-                    localStorage.setItem("userName", user.name);
-                    return next();
-                }
-                return next();
-            });
-        });
-};
-
+// views
 server.set("view engine", "ejs");
 server.set("views", "views");
-
 
 //              Middleware
 // Body parser
@@ -65,22 +44,44 @@ server.use(bodyParser.urlencoded({ extended: false }));
 server.use(express.static(path.join(rootDir, "public")));
 // sessions
 server.use(
-    session({ secret: "qwerty", resave: false, saveUninitialized: false })
+    session({
+        secret: "qwerty",
+        resave: false,
+        saveUninitialized: false,
+        store,
+    })
 );
+// Security
+// crud ops security
+server.use(crsfProtection);
+// user auth errors
+server.use(flash())
+// Local vars for each response
+server.use((req, res, next) => {
+    res.locals.isAuthenticated = req.session.isAuthenticated;
+    res.locals.csrfToken = req.csrfToken();
+    next();
+});
+// User session authentication
+server.use((req, res, next) => {
+    if (!req.session.user) {
+        return next();
+    }
+    return User.findById(req.session.user._id).then((user) => {
+        req.user = user;
+        return next();
+    });
+});
 
 // Routing
-server.use("/admin", userMidWare, adminRoutes.router);
-server.use("/clients", userMidWare, shopRoutes);
+server.use("/admin", adminRoutes.router);
+server.use("/clients", shopRoutes);
 server.use(authRoutes);
 server.use(errorControllers.get404Page);
 
-
 // Listener
 mongoose
-    .connect(
-        "mongodb+srv://ghostxp:selassie123@ghost-db.9i0m7.mongodb.net/bookShop?retryWrites=true&w=majority",
-        { useUnifiedTopology: true, useNewUrlParser: true }
-    )
+    .connect(MONGO_URI, { useUnifiedTopology: true, useNewUrlParser: true })
     .then((res) =>
         server.listen(8000, () => console.log("Connection succesfully :)"))
     )

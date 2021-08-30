@@ -1,7 +1,7 @@
 const { LocalStorage } = require("node-localstorage");
 
 const Product = require("../models/product");
-const Cart = require("../models/cart");
+const User = require("../models/users");
 const localStorage = new LocalStorage("./scratch");
 
 const userName = localStorage.getItem("userName");
@@ -14,8 +14,6 @@ const getAddProductsPage = (req, res, next) => {
         pageTitle: "Add-Product",
         path: "/admin/add-product",
         editMode: false,
-        userName,
-        isAuthenticated : req.isLoggedin
     });
 };
 
@@ -54,7 +52,7 @@ const editProductsPage = (req, res, next) => {
                 editMode,
                 product: product[0],
                 userName,
-                isAuthenticated : req.isLoggedin
+
 
             });
         })
@@ -70,14 +68,11 @@ const getAllAdminProducts = (req, res, next) => {
         // .select("title image price -_id") // Used to select fields . Note :: **-** removes the id field
         // .populate("user", "name email address -_id") // Used to populate reffrenced fields .
         .then((products) => {
-            console.log(products);
             res.render("admin/productsList", {
                 pageTitle: "Admin Products",
                 path: "/admin/productsList",
                 products,
                 userName,
-                isAuthenticated : req.isLoggedin
-
             });
         })
         .catch((err) => console.log("Error finding products", err));
@@ -101,15 +96,14 @@ const editProductPage = (req, res, next) => {
     );
 };
 const deleteProduct = (req, res, next) => {
-    let id = req.body.productID;
-    id = id.trim();
-    return Product.findByIdAndRemove(id)
+    let productID = req.body.productID;
+    productID = productID.trim();
+    return Product.findByIdAndRemove(productID)
         .then((response) => {
-            return res.redirect("/clients/");
             // Delete from cart
-            return Cart().deleteById(id, userName, (response) => {
-                console.log(response);
+            return req.user.removeFromCart(productID ,(response) => {
                 if (response.includes("Error")) return;
+                return res.redirect("/clients/");
             });
         })
         .catch((err) => {

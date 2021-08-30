@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const userSchema = new Schema({
-    name: { type: String, required: true },
+    pwd : {type : String , required : true},
     email: { type: String, required: true },
     address: { type: String, required: true },
     cart: {
@@ -39,9 +39,10 @@ userSchema.methods.addToCart = function (product, cb) {
     if (exists > -1) {
         //Update cart
         let existingItem = updatedCart[exists];
-        existingItem.qty += 1;
+        existingItem.item.qty += 1;
 
         updatedCart[exists] = existingItem;
+        console.log(updatedCart)
     } else {
         //Add new item
         updatedCart.push({ item });

@@ -8,7 +8,7 @@ const localStorage = new LocalStorage("./scratch");
 const userName = localStorage.getItem("userName");
 const renderProductsPage = (req, res, next) => {
   // get cookie-->true
-  req.isLoggedin = (req.get('Cookie').split('=')[1])
+//   req.isLoggedin = (req.get('Cookie').split('=')[1])
 
     return Product.find()
         .then((products) =>
@@ -18,7 +18,7 @@ const renderProductsPage = (req, res, next) => {
                 products,
                 userId: userName.toLowerCase(),
                 userName,
-                isAuthenticated : req.isLoggedin
+                isAuthenticated : req.session.isLoggedin
             })
         )
         .catch((err) => console.log("Error finding products", err));
@@ -38,7 +38,7 @@ const renderProdDetailsPage = (req, res, next) => {
                 product,
                 userName,
                 userId: userName.toLowerCase(),
-                isAuthenticated : req.isLoggedin
+                isAuthenticated : req.session.isLoggedin
             });
         })
         .catch((err) => console.log("Error finding products", err));
@@ -46,7 +46,7 @@ const renderProdDetailsPage = (req, res, next) => {
 
 const renderCartPage = (req, res, next) => {
   // get cookie-->true
-  req.isLoggedin = (req.get('Cookie').split('=')[1])
+//   req.isLoggedin = (req.get('Cookie').split('=')[1])
 
     let user = req.user;
     user.populate("cart.item._id", "title image price")
@@ -58,7 +58,7 @@ const renderCartPage = (req, res, next) => {
                 products: user.cart,
                 total: 100,
                 userName,
-                isAuthenticated : req.isLoggedin
+                isAuthenticated : req.session.isLoggedin
             });
         });
     // Cart().getFullCart(userName, (cart, total) => {
@@ -75,9 +75,9 @@ const addToCart = (req, res, next) => {
         return res.redirect("/clients/cart");
     });
 };
-const renderCheckoutPage = (req, res, next) => {
+const postOrder = (req, res, next) => {
     return req.user
-        .populate("cart.item._id -_id")
+        .populate("cart.item._id -cart._id")
         .execPopulate()
         .then((result) => {
             return result.cart.map((i) => {
@@ -85,7 +85,7 @@ const renderCheckoutPage = (req, res, next) => {
                     _id: i.item._id._id,
                     proPrice: i.item._id.price,
                     qty: i.item.qty,
-                    user: i.item._id.user,
+                    user: req.user._id,
                 };
             });
         })
@@ -106,7 +106,7 @@ const renderCheckoutPage = (req, res, next) => {
 
 const renderHomePage = (req, res, next) => {
   // get cookie-->true
-  req.isLoggedin = (req.get('Cookie').split('=')[1])
+//   req.isLoggedin = (req.get('Cookie').split('=')[1])
 
     const userName = localStorage.getItem("userName");
     return (
@@ -118,27 +118,25 @@ const renderHomePage = (req, res, next) => {
                     pageTitle: "Home",
                     path: "/index",
                     products,
-                    userId: req.user._id,
                     userName,
-                    isAuthenticated : req.isLoggedin
+                    isAuthenticated : req.session.isLoggedin
                 });
             })
     );
 };
 const renderOrdersPage = (req, res, next) => {
      // get cookie-->true
-  req.isLoggedin = (req.get('Cookie').split('=')[1])
+//   req.isLoggedin = (req.get('Cookie').split('=')[1])
     Order.find({})
-        .populate("cart.user", "name address email")
+        .populate("cart.user", "address email")
         .select("cart._id cart.qty")
         .then((response) => {
-            console.log(response);
             return res.render("clients/orders", {
                 pageTitle: "Orders",
                 path: "/orders",
                 orders: response,
                 userName,
-                isAuthenticated : req.isLoggedin
+                isAuthenticated : req.session.isLoggedin
             });
         });
 };
@@ -153,7 +151,7 @@ const removeItem = (req, res, next) => {
 module.exports = {
     renderProductsPage,
     renderCartPage,
-    renderCheckoutPage,
+    postOrder,
     renderHomePage,
     renderOrdersPage,
     renderProdDetailsPage,

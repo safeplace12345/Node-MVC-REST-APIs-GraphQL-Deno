@@ -9,6 +9,7 @@ const get404Page = (req, res) => {
         pageTitle: "Page Not Found",
         path: "/404",
         userName,
+        isAuthenticated : req.session.isLoggedin
     });
 };
 module.exports = {

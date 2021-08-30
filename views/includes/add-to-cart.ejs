@@ -2,10 +2,11 @@
   <button type="button" class="btn">
     <a href="/clients/productDetails/<%= product._id %>"> Details</a>
   </button>
-  <form action="/clients/cart/?user=<%= userId %>" method="post">
+  <form action="/clients/cart/%>" method="post">
     <input type="text" value="<%= product._id %>" id="proID" style="display: none" name="proID" />
     <!-- <input type="number" value="<%= product.price %>" id="proPrice" style="display: none" name="proPrice" /> -->
-    <% if (path !=='/index' ) { %>
+    <input type="text" value="<%=csrfToken%>" style="visibility: hidden;" name="_csrf">
+    <% if (path !=='/index' && isAuthenticated ) { %>
       <button class="btn" type="submit">Add to Cart</button>
       <% } %>
   </form>
