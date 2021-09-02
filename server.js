@@ -58,8 +58,9 @@ server.use(crsfProtection);
 server.use(flash())
 // Local vars for each response
 server.use((req, res, next) => {
-    res.locals.isAuthenticated = req.session.isAuthenticated;
+    res.locals.isAuthenticated = req.session.isLoggedin;
     res.locals.csrfToken = req.csrfToken();
+    res.locals.validationErrParams = []
     next();
 });
 // User session authentication

@@ -3,18 +3,47 @@ const router = express.Router();
 // All redirect to /admin/...
 const adminController = require("../controllers/admin");
 
+const { check, params, body } = require("express-validator/check");
 // Authentication middleware
 const isAuth = require("../middleware/is-auth");
-// Method => GEt
+// Method => GEt add product page
 router.get("/add-product", isAuth, adminController.getAddProductsPage);
-// Method =>GET with PARAMS
+// Method =>GET with PARAMS edit product page
 router.get("/add-product/:prodID", isAuth, adminController.editProductsPage);
-// Method => POST
-router.post("/products", isAuth, adminController.postProductsPage);
+// Method => POST add product
+router.post(
+    "/products",
+    [
+        body("title", "Title cannot be less than 3 characters")
+            .isLength({ min: 3 })
+            .trim(),
+        check("image", "Image Url format unsupported").isURL().trim(),
+        check("price", "Only intergers allowed for prices").isFloat().trim(),
+        check("description", "Description too short")
+            .trim()
+            .isLength({ min: 6 }),
+    ],
+    isAuth,
+    adminController.postProductsPage
+);
 // Method => GET
 router.get("/productsList", adminController.getAllAdminProducts);
 router.post("/delete", isAuth, adminController.deleteProduct);
-// Method => POST
-router.post("/edit-product", isAuth, adminController.editProductPage);
+// Method => POST edit product
+router.post(
+    "/edit-product",
+    [
+        body("title", "Title cannot be less than 3 characters")
+            .isLength({ min: 3 })
+            .trim(),
+        check("image", "Image Url format unsupported").isURL().trim(),
+        check("price", "Only intergers allowed for prices").isFloat().trim(),
+        check("description", "Description too short")
+            .trim()
+            .isLength({ min: 6 }),
+    ],
+    isAuth,
+    adminController.editProductPage
+);
 
 module.exports = { router };

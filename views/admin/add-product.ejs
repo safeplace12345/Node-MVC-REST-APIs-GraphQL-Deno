@@ -7,6 +7,9 @@
 <body>
     <%- include('../includes/nav.ejs') %>
     <main>
+        <% if (errorMsg) { %>
+            <div class="user-message user-message--error"> <%= errorMsg %></div>
+                        <% }%>
         <form class="product-form"
         <% if (editMode) {%>
                 action="/admin/edit-product"
@@ -15,19 +18,20 @@
         <% } %>  method="POST">
             <div class="form-control">
                 <label for="title">Title</label>
-                <input type="text" name="title" id="title" value="<% if (editMode) { %> <%= product.title %> <% } %>">
+                <input type="text" name="title" id="title"
+                 value="<% if (editMode){ %> <%= product.title %> <%} else {%> <%=oldInput.title%><% }%>">
             </div>
             <div class="form-control">
                 <label for="image">Image Url</label>
-                <input type="text" name="image" id="image" value ="<% if (editMode) { %> <%= product.image %> <% } %>">
+                <input type="text" name="image" id="image" value ="<% if (editMode) { %> <%= product.image %><% } else { %><%= oldInput.image %><% } %>">
             </div>
             <div class="form-control">
                 <label for="price">Price</label>
-                <input type="text" name="price" id="price" step="0.01" value="<% if (editMode) { %> <%= +product.price %> <% } %>">
+                <input type="text" name="price" id="price" step="0.01" value="<% if (editMode) { %> <%= +product.price %> <% } else { %><%= oldInput.price %><% } %>">
             </div>
             <div class="form-control">
                 <label for="description">Description</label>
-               <textarea name="description" id="description" cols="30" rows="10" placeholder="Message Us..."><% if (editMode) { %> <%= product.description %> <% } %>   </textarea>
+               <textarea name="description" id="description" cols="30" rows="10" placeholder="Message Us..."><% if (editMode) { %> <%= product.description %> <% } else { %><%=oldInput.description%><% } %>   </textarea>
             </div>
 
             <input type="text" name="id" style="visibility: hidden;" value="<% if (editMode) { %> <%= product._id %> <% } %>">

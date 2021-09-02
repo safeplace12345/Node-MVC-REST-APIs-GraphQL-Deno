@@ -17,8 +17,6 @@ const renderProductsPage = (req, res, next) => {
                 path: "/clients/",
                 products,
                 userId: userName.toLowerCase(),
-                userName,
-                isAuthenticated : req.session.isLoggedin
             })
         )
         .catch((err) => console.log("Error finding products", err));

@@ -13,14 +13,22 @@
         method="POST" action="/login">
             <div class="form-control">
                 <label for="email">Email</label>
-                <input type="email" name="email" id="email" >
+                <input type="email"
+                class="<%= validationErrParams.includes('email') ? 'invalid' : '' %>"
+                name="email" id="email" value="<%= oldInput.email%>">
             </div>
             <div class="form-control">
                 <label for="pwd">Password</label>
-                <input type="password" name="pwd" id="pwd" >
+                <input type="password"
+                class="<%= validationErrParams.includes('pwd') ? 'invalid' : '' %>"
+                name="pwd" id="pwd" value="<%= oldInput.pwd%>">
             </div>
             <input type="text" value="<%=csrfToken%>" style="visibility: hidden;" name="_csrf">
             <button type="submit" class="btn ">Submit </button>
         </form>
+        <button type="button" class="btn">
+            <a href="/forgot-password"> Forgot Password </a>
+          </button>
+
     </main>
     <%- include('../includes/footer.ejs') %>
