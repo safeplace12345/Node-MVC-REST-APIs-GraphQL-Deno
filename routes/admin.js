@@ -3,7 +3,7 @@ const router = express.Router();
 // All redirect to /admin/...
 const adminController = require("../controllers/admin");
 
-const { check, params, body } = require("express-validator/check");
+const { check, body } = require("express-validator/check");
 // Authentication middleware
 const isAuth = require("../middleware/is-auth");
 // Method => GEt add product page
@@ -28,7 +28,7 @@ router.post(
 );
 // Method => GET
 router.get("/productsList", adminController.getAllAdminProducts);
-router.post("/delete", isAuth, adminController.deleteProduct);
+router.post("/delete",body("productID").trim(), isAuth, adminController.deleteProduct);
 // Method => POST edit product
 router.post(
     "/edit-product",

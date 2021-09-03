@@ -19,8 +19,8 @@ const transporter = nodeMailer.createTransport(
 
 // Controllers
 const getLogin = (req, res, next) => {
-    const oldInput = {email : "", pwd : ""}
-    const validationErrParams = []
+    const oldInput = { email: "", pwd: "" };
+    const validationErrParams = [];
     //Retrieve cookies
     // req.isLoggedin = (req.get('Cookie').split('=')[1]) === 'true'
     res.render("auth/login", {
@@ -29,25 +29,31 @@ const getLogin = (req, res, next) => {
         userName: "",
         errorMsg: req.flash("error")[0],
         oldInput,
-        validationErrParams
+        validationErrParams,
     });
 };
 const postLogout = (req, res, next) => {
     return req.session.destroy((err) => {
-        if (err) return console.log({ err });
+        if (err) {
+            const error = new Error(
+                "Logout Failure : userID " + req.user._id,
+                err
+            );
+            error.httpStatusCode = 500;
+            return next(error);
+        }
         return res.redirect("/clients/");
     });
 };
 const postLogin = async (req, res, next) => {
     const { email, pwd } = JSON.parse(JSON.stringify(req.body));
 
-    const oldInput = {email , pwd}
+    const oldInput = { email, pwd };
 
     const errors = validationResult(req);
 
-        const validationErrParams = []
+    const validationErrParams = [];
     if (errors.isEmpty()) {
-
         return await User.findOne({ email })
             .then((user) => {
                 // Validate user
@@ -71,10 +77,19 @@ const postLogin = async (req, res, next) => {
                             userName: "",
                             errorMsg: req.flash("error")[0],
                             oldInput,
-                            validationErrParams
+                            validationErrParams,
                         });
                     })
-                    .catch((err) => console.log({ invalidPwd: err }));
+                    .catch((err) => {
+                        return res.status(422).render("auth/login", {
+                            path: "/login",
+                            pageTitle: "Login",
+                            userName: "",
+                            errorMsg: "Invalid User credentials",
+                            oldInput,
+                            validationErrParams,
+                        });
+                    });
             })
             .catch((err) => {
                 console.log({ userNotFound: err });
@@ -84,7 +99,7 @@ const postLogin = async (req, res, next) => {
                     userName: "",
                     errorMsg: req.flash("error")[0],
                     oldInput,
-                    validationErrParams
+                    validationErrParams,
                 });
             });
     } else {
@@ -94,7 +109,7 @@ const postLogin = async (req, res, next) => {
             userName: "",
             errorMsg: errors.array()[0].msg,
             oldInput,
-            validationErrParams
+            validationErrParams,
         });
     }
 };
@@ -103,7 +118,7 @@ const getSignup = async (req, res, next) => {
         pageTitle: "Signup",
         path: "/signup",
         errorMsg: req.flash("error")[0],
-        validationErrParams:[],
+        validationErrParams: [],
         /**
          * For better UI only
          */
@@ -121,7 +136,7 @@ const postSignup = async (req, res, next) => {
     // validate
     const errors = validationResult(req);
 
-    const validationErrParams = errors.array().map((e) => e.param)
+    const validationErrParams = errors.array().map((e) => e.param);
     if (!errors.isEmpty()) {
         console.log(errors.array().map((e) => e.param));
         return res.status(422).render("auth/signup", {
@@ -136,7 +151,7 @@ const postSignup = async (req, res, next) => {
                 password,
                 confirmPassword,
             },
-            validationErrParams
+            validationErrParams,
         });
     }
 
@@ -166,7 +181,12 @@ const postSignup = async (req, res, next) => {
                     console.log({ err });
                 });
         })
-        .catch((err) => console.log({ err }));
+        .catch((err) => { const error = new Error(
+            "Password Encryption error" + req.user._id,
+            err
+        );
+        error.httpStatusCode = 500;
+        return next(error);});
 };
 const getFgtPassword = async (req, res, next) => {
     res.render("auth/forgot-password", {
@@ -190,7 +210,14 @@ const postFgtPassword = async (req, res, next) => {
     user.resetToken = token;
     user.resetTokenExp = Date.now() + 3600000;
     return await user.save(function (err, user) {
-        if (err) throw new Error("User failed to be saved", +err);
+        if (err) {
+            const error = new Error(
+                "Failed to save new user password after reset" + req.user._id,
+                err
+            );
+            error.httpStatusCode = 500;
+            return next(error);
+        };
         res.redirect("/login");
         return transporter
             .sendMail({
@@ -218,7 +245,14 @@ const getReset = (req, res, next) => {
                 userID: user._id.toString(),
             });
         })
-        .catch((err) => console.log({ err }));
+        .catch((err) => {
+            const error = new Error(
+                "User Token validation failed " + req.user._id,
+                err
+            );
+            error.httpStatusCode = 500;
+            return next(error);
+        });
 };
 const postReset = async (req, res, next) => {
     const { userID, pwd } = JSON.parse(JSON.stringify(req.body));

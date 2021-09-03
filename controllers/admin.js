@@ -14,7 +14,7 @@ const getAddProductsPage = (req, res, next) => {
         path: "/admin/add-product",
         editMode: false,
         oldInput,
-        errorMsg : ""
+        errorMsg: "",
     });
 };
 
@@ -25,18 +25,18 @@ const postProductsPage = (req, res, next) => {
     const errors = validationResult(req);
 
     const validationErrParams = errors.array().map((e) => e.params);
-    console.log(errors.array())
+
     if (!errors.isEmpty()) {
         return res.status(422).render("admin/add-product", {
             pageTitle: "Add-Product",
             path: "/admin/add-product",
             editMode: false,
-            oldInput : {title,image,price,description},
+            oldInput: { title, image, price, description },
             validationErrParams,
             errorMsg: errors.array()[0].msg,
         });
     }
-    const product = Product({ title, image, price, description, user: _id });
+    const product = Product({title, image, price, description, user: _id });
     // save product
     return product
         .save()
@@ -44,7 +44,11 @@ const postProductsPage = (req, res, next) => {
             console.log("Successfully saved new product");
             return res.redirect("/clients/");
         })
-        .catch((err) => console.log("Error saving product", err));
+        .catch((err) => {
+            const error = new Error("Error saving product", err);
+            error.httpStatusCode = 500;
+            return next(error);
+        });
 };
 const editProductsPage = (req, res, next) => {
     // get cookie-->true
@@ -53,12 +57,11 @@ const editProductsPage = (req, res, next) => {
     const prodID = req.params.prodID;
     const editMode = req.query.edit;
 
-
     if (!editMode) {
         return res.redirect("/404");
     }
 
-    const errors = validationResult(req)
+    const errors = validationResult(req);
     const validationErrParams = errors.array().map((e) => e.params);
 
     Product.find({ _id: prodID })
@@ -71,11 +74,15 @@ const editProductsPage = (req, res, next) => {
                 path: "/admin/add-product",
                 editMode,
                 product: product[0],
-                errorMsg : "",
-                validationErrParams : ""
+                errorMsg: "",
+                validationErrParams: "",
             });
         })
-        .catch((err) => console.log("Product not found", err));
+        .catch((err) => {
+            const error = new Error("Product not Found", err);
+            error.httpStatusCode = 500;
+            return next(error);
+        });
 };
 
 const getAllAdminProducts = (req, res, next) => {
@@ -92,7 +99,11 @@ const getAllAdminProducts = (req, res, next) => {
                     products,
                 });
             })
-            .catch((err) => console.log("Error finding products", err))
+            .catch((err) => {
+                const error = new Error("Error finding products", err);
+                error.httpStatusCode = 500;
+                return next(error);
+            })
     );
 };
 
@@ -101,7 +112,7 @@ const editProductPage = (req, res, next) => {
         JSON.stringify(req.body)
     );
 
-    const errors = validationResult(req)
+    const errors = validationResult(req);
     const validationErrParams = errors.array().map((e) => e.params);
 
     if (!errors.isEmpty()) {
@@ -109,7 +120,7 @@ const editProductPage = (req, res, next) => {
             pageTitle: "Add-Product",
             path: "/admin/add-product",
             editMode: true,
-            oldInput : {title,image,price,description},
+            oldInput: { title, image, price, description },
             validationErrParams,
             errorMsg: errors.array()[0].msg,
         });
@@ -121,9 +132,15 @@ const editProductPage = (req, res, next) => {
         { _id: id, user: req.user._id },
         { title, image, description, price },
         (err, response) => {
-            if (err) return console.log("Error updating product", err);
+            if (err) {
+                const error = new Error("Error updating product", err);
+                error.httpStatusCode = 500;
+                return next(error);
+            }
 
-            if (!response) return res.redirect("/clients/");
+            if (!response) {
+                return res.redirect("/404");
+            }
 
             console.log("Succesfully updating product", response);
             return res.redirect("/admin/productsList");
@@ -131,24 +148,24 @@ const editProductPage = (req, res, next) => {
     );
 };
 const deleteProduct = (req, res, next) => {
-    let productID = req.body.productID;
-    productID = productID.trim();
-    return Product.findByIdAndRemove({ _id : productID, user: req.user._id })
+    let productID = req.body.productID.trim();
+
+    return Product.findByIdAndRemove({ _id: productID, user: req.user._id })
         .then((response) => {
             // Delete from cart
-            console.log(response)
             if (!response) {
-                return res.redirect("/clients/");
+                return res.redirect("/404");
             }
             return req.user.removeFromCart(productID, (response) => {
-                if (response.includes("Error")) return;
+                if (response.includes("Error")) return res.redirect("/404");
                 return res.redirect("/clients/");
             });
         })
         .catch((err) => {
-            console.log(err);
-            res.redirect("404");
-        });
+            const error = new Error("Error Deleting product", err);
+            error.httpStatusCode = 500;
+            return next(error);
+     });
 };
 
 module.exports = {

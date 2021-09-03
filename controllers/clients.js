@@ -7,8 +7,8 @@ const localStorage = new LocalStorage("./scratch");
 
 const userName = localStorage.getItem("userName");
 const renderProductsPage = (req, res, next) => {
-  // get cookie-->true
-//   req.isLoggedin = (req.get('Cookie').split('=')[1])
+    // get cookie-->true
+    //   req.isLoggedin = (req.get('Cookie').split('=')[1])
 
     return Product.find()
         .then((products) =>
@@ -19,13 +19,15 @@ const renderProductsPage = (req, res, next) => {
                 userId: userName.toLowerCase(),
             })
         )
-        .catch((err) => console.log("Error finding products", err));
-
-    };
+        .catch((err) => {
+            console.log("Error finding products", err);
+            return res.redirect("/404");
+        });
+};
 
 const renderProdDetailsPage = (req, res, next) => {
-     // get cookie-->true
-     req.isLoggedin = (req.get('Cookie').split('=')[1])
+    // get cookie-->true
+    req.isLoggedin = req.get("Cookie").split("=")[1];
 
     const productId = req.params.productId;
     return Product.findById(productId)
@@ -36,15 +38,19 @@ const renderProdDetailsPage = (req, res, next) => {
                 product,
                 userName,
                 userId: userName.toLowerCase(),
-                isAuthenticated : req.session.isLoggedin
+                isAuthenticated: req.session.isLoggedin,
             });
         })
-        .catch((err) => console.log("Error finding products", err));
+        .catch((err) =>
+        {
+            const error = new Error("Product Details not found", err);
+            error.httpStatusCode = 500;
+            return next(error);});
 };
 
 const renderCartPage = (req, res, next) => {
-  // get cookie-->true
-//   req.isLoggedin = (req.get('Cookie').split('=')[1])
+    // get cookie-->true
+    //   req.isLoggedin = (req.get('Cookie').split('=')[1])
 
     let user = req.user;
     user.populate("cart.item._id", "title image price")
@@ -56,11 +62,14 @@ const renderCartPage = (req, res, next) => {
                 products: user.cart,
                 total: 100,
                 userName,
-                isAuthenticated : req.session.isLoggedin
+                isAuthenticated: req.session.isLoggedin,
             });
+        }).catch(err => {
+            const error = new Error("User cart not Found", err);
+            error.httpStatusCode = 500;
+            return next(error);
         });
-    // Cart().getFullCart(userName, (cart, total) => {
-    // });
+
 };
 
 const addToCart = (req, res, next) => {
@@ -68,7 +77,12 @@ const addToCart = (req, res, next) => {
     let user = req.user;
     let product = JSON.parse(JSON.stringify(req.body));
     user.addToCart(product, (response) => {
-        if (response.includes("Error")) return res.redirect("/404");
+        if (response.includes("Error")) {
+            const error = new Error("User cart missing", response);
+            error.httpStatusCode = 500;
+            req.flash("error","User cart missing")
+            return next(error);
+        };
 
         return res.redirect("/clients/cart");
     });
@@ -103,8 +117,8 @@ const postOrder = (req, res, next) => {
 };
 
 const renderHomePage = (req, res, next) => {
-  // get cookie-->true
-//   req.isLoggedin = (req.get('Cookie').split('=')[1])
+    // get cookie-->true
+    //   req.isLoggedin = (req.get('Cookie').split('=')[1])
 
     const userName = localStorage.getItem("userName");
     return (
@@ -117,14 +131,14 @@ const renderHomePage = (req, res, next) => {
                     path: "/index",
                     products,
                     userName,
-                    isAuthenticated : req.session.isLoggedin
+                    isAuthenticated: req.session.isLoggedin,
                 });
             })
     );
 };
 const renderOrdersPage = (req, res, next) => {
-     // get cookie-->true
-//   req.isLoggedin = (req.get('Cookie').split('=')[1])
+    // get cookie-->true
+    //   req.isLoggedin = (req.get('Cookie').split('=')[1])
     Order.find({})
         .populate("cart.user", "address email")
         .select("cart._id cart.qty")
@@ -134,7 +148,7 @@ const renderOrdersPage = (req, res, next) => {
                 path: "/orders",
                 orders: response,
                 userName,
-                isAuthenticated : req.session.isLoggedin
+                isAuthenticated: req.session.isLoggedin,
             });
         });
 };

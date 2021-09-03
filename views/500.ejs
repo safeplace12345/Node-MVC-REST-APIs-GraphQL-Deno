@@ -1,0 +1,15 @@
+<%- include('includes/head.ejs') %>
+</head>
+
+<%- include('includes/nav.ejs') %>
+<body>
+<main>
+    <h1><%= pageTitle %></h1>
+    <p>An Error Occured , please Try again later</p>
+    <span>Sorry</span>
+    <% if (errorMsg) { %>
+        <div class="user-message user-message--error"> <%= errorMsg %></div>
+                    <% }%>
+
+</main>
+    <%- include('includes/footer.ejs') %>

@@ -3,8 +3,7 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const userSchema = new Schema({
-
-    pwd : {type : String , required : true},
+    pwd: { type: String, required: true },
     email: { type: String, required: true },
     address: { type: String, required: true },
     cart: {
@@ -22,8 +21,8 @@ const userSchema = new Schema({
         ],
         required: true,
     },
-    resetToken : String,
-    resetTokenExp : String
+    resetToken: String,
+    resetTokenExp: String,
 });
 
 userSchema.methods.addToCart = function (product, cb) {
@@ -34,9 +33,9 @@ userSchema.methods.addToCart = function (product, cb) {
         _id: trimedProduct.proID, // _id must be specified otherwise mongodb goes nuts
         qty: 1,
     };
-    const exists = this.cart.findIndex((i
-        ) => {
-      return  i.item._id == item._id});
+    const exists = this.cart.findIndex((i) => {
+        return i.item._id == item._id;
+    });
 
     let updatedCart = this.cart;
     if (exists > -1) {
@@ -45,7 +44,7 @@ userSchema.methods.addToCart = function (product, cb) {
         existingItem.item.qty += 1;
 
         updatedCart[exists] = existingItem;
-        console.log(updatedCart)
+        console.log(updatedCart);
     } else {
         //Add new item
         updatedCart.push({ item });
@@ -53,7 +52,10 @@ userSchema.methods.addToCart = function (product, cb) {
 
     this.cart = updatedCart;
     this.save(function (err) {
-        if (err) return console.log({ err });
+        if (err) {
+            console.log({ err });
+            cb("Error");
+        }
         cb("Success");
     });
 };
@@ -70,16 +72,15 @@ userSchema.methods.removeFromCart = function (productId, cb) {
     // Clean or remove item
 
     const updated = cart.filter(({ item }) => {
-        console.log(item._id,productId)
-       return item._id === productId;
+        console.log(item._id, productId);
+        return item._id === productId;
     });
     this.cart = updated;
-    console.log(this.cart)
-    return this.save(function(err){
-        if(err) return console.log({err})
+    console.log(this.cart);
+    return this.save(function (err) {
+        if (err) return console.log({ err });
         return cb(`Success deleting from ${productId} cart`);
-    })
-
+    });
 };
 
 module.exports = mongoose.model("User", userSchema);

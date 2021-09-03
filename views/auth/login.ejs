@@ -6,9 +6,7 @@
 <body>
     <%- include('../includes/nav.ejs') %>
     <main>
-        <% if (errorMsg) { %>
-<div class="user-message user-message--error"> <%= errorMsg %></div>
-            <% }%>
+
         <form class="product-form"
         method="POST" action="/login">
             <div class="form-control">
