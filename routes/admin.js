@@ -17,7 +17,7 @@ router.post(
         body("title", "Title cannot be less than 3 characters")
             .isLength({ min: 3 })
             .trim(),
-        check("image", "Image Url format unsupported").isURL().trim(),
+        check("_csrf", "Invalid crsf tokens"),
         check("price", "Only intergers allowed for prices").isFloat().trim(),
         check("description", "Description too short")
             .trim()
@@ -36,7 +36,6 @@ router.post(
         body("title", "Title cannot be less than 3 characters")
             .isLength({ min: 3 })
             .trim(),
-        check("image", "Image Url format unsupported").isURL().trim(),
         check("price", "Only intergers allowed for prices").isFloat().trim(),
         check("description", "Description too short")
             .trim()

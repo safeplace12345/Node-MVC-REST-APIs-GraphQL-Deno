@@ -20,7 +20,9 @@ const getAddProductsPage = (req, res, next) => {
 
 const postProductsPage = (req, res, next) => {
     const { _id } = req.user;
-    const { title, image, price, description } = req.body;
+    const { title, price, description } = req.body;
+    // Created by multer plugin
+    const image = req.file;
     // create new product
     const errors = validationResult(req);
 
@@ -36,7 +38,23 @@ const postProductsPage = (req, res, next) => {
             errorMsg: errors.array()[0].msg,
         });
     }
-    const product = Product({title, image, price, description, user: _id });
+    if (!image) {
+        return res.status(422).render("admin/add-product", {
+            pageTitle: "Add-Product",
+            path: "/admin/add-product",
+            editMode: false,
+            oldInput: { title, price, description },
+            validationErrParams,
+            errorMsg: "Image file not supported , Please try again",
+        });
+    }
+    const product = Product({
+        title,
+        image: image.path,
+        price,
+        description,
+        user: _id,
+    });
     // save product
     return product
         .save()
@@ -108,9 +126,11 @@ const getAllAdminProducts = (req, res, next) => {
 };
 
 const editProductPage = (req, res, next) => {
-    let { id, title, image, description, price } = JSON.parse(
+    let { id, title, description, price } = JSON.parse(
         JSON.stringify(req.body)
     );
+    let image = req.file;
+    id = id.trim();
 
     const errors = validationResult(req);
     const validationErrParams = errors.array().map((e) => e.params);
@@ -126,12 +146,14 @@ const editProductPage = (req, res, next) => {
         });
     }
 
-    id = id.trim();
     // Note Objects will contain an _id field after creation
     return Product.findByIdAndUpdate(
         { _id: id, user: req.user._id },
-        { title, image, description, price },
+        image
+            ? { title, image: image.path, description, price }
+            : { title, description, price },
         (err, response) => {
+            11;
             if (err) {
                 const error = new Error("Error updating product", err);
                 error.httpStatusCode = 500;
@@ -165,7 +187,7 @@ const deleteProduct = (req, res, next) => {
             const error = new Error("Error Deleting product", err);
             error.httpStatusCode = 500;
             return next(error);
-     });
+        });
 };
 
 module.exports = {

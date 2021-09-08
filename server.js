@@ -7,6 +7,7 @@ const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 const csrf = require("csurf");
 const flash = require("connect-flash");
+const multer = require("multer")
 
 const rootDir = require("./utils/path");
 const adminRoutes = require("./routes/admin");
@@ -16,6 +17,25 @@ const authRoutes = require("./routes/auth");
 const errorRoutes = require("./routes/errors");
 const User = require("./models/users");
 
+// Multer uploader && dowloader config
+const multerConfig = {
+    store : multer.diskStorage({
+        destination : (req, file , cb) => {
+            return cb(null , "images")
+        },
+        filename : (req , file ,cb) => {
+            let name = file.originalname.split(".")[0] + "-" + Math.random()*16 + "." +file.mimetype.split("/")[1]
+            return cb(null, name)
+        }
+    }),
+    fileFilter  : (req ,file , cb) => {
+        if(file.mimetype === "image/jpg" || file.mimetype === "image/jpeg" || file.mimetype === "image/png"){
+            return cb(null , true)
+        }else{
+            return cb(null , false)
+        }
+    }
+}
 // Session store on mongodb
 
 const MONGO_URI =
@@ -39,8 +59,15 @@ server.set("views", "views");
 //              Middleware
 // Body parser
 server.use(bodyParser.urlencoded({ extended: false }));
+// file parse
+server.use(multer({storage : multerConfig.store , fileFilter : multerConfig.fileFilter}).single("image"))
+
 // Static files( css,js,images) middleware
 server.use(express.static(path.join(rootDir, "public")));
+// images route
+server.use("/images",express.static(path.join(rootDir, "images")));
+
+
 // sessions
 server.use(
     session({
