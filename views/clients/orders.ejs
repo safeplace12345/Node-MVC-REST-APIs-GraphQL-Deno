@@ -11,14 +11,16 @@
                 <ul class="orders">
                     <% orders.forEach(order => { %>
                         <li class="orders__item">
-                            <h1>Order - # <%= order.cart._id %></h1>
+                            <h1>Order - # <%= order._id %></h1>
                             <ul class="orders__products">
 
                                     <li class="orders__products-item">
                                         <ul>
                                             <li> Address : <%= order.cart.user.address %></li>
                                             <li>Email : <%= order.cart.user.email %></li>
-                                        </ul>Quantity : <%= order.cart.qty %></li>
+                                           <li> Quantity : <%= order.cart.qty %></li>
+                                           <li> <a href="/clients/orders/<%=order._id%>"> Download Invoice </a></li>
+                                        </ul>
                             </ul>
                         </li>
                     <% }); %>

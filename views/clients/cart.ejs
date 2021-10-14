@@ -20,8 +20,11 @@
                             <h1 class="product__title"><%= product.item._id.title %> </h1>
                 </header>
                 <div class="card__image">
-                    <img src="<%= product.item._id.image %> ">
-                </div>
+                     <% if(product.item._id.image.includes("http")) { %>
+                        <img src="<%= product.item._id.image %> ">
+                        <% } else { %>
+                            <img src="/<%= product.item._id.image %>">
+                        <% }%> </div>
                 <div class="card__content">
                     <h2 class="product__price"><%= product.item._id.price%></h2>
                     <p class="product__description">

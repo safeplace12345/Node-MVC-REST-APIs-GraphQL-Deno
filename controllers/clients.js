@@ -1,5 +1,8 @@
 const { LocalStorage } = require("node-localstorage");
+const fs = require("fs");
+const pdfDoc = require("pdfkit");
 
+const path = require("../utils/path");
 const User = require("../models/users");
 const Product = require("../models/product");
 const Order = require("../models/orders");
@@ -41,11 +44,11 @@ const renderProdDetailsPage = (req, res, next) => {
                 isAuthenticated: req.session.isLoggedin,
             });
         })
-        .catch((err) =>
-        {
+        .catch((err) => {
             const error = new Error("Product Details not found", err);
             error.httpStatusCode = 500;
-            return next(error);});
+            return next(error);
+        });
 };
 
 const renderCartPage = (req, res, next) => {
@@ -56,6 +59,7 @@ const renderCartPage = (req, res, next) => {
     user.populate("cart.item._id", "title image price")
         .execPopulate()
         .then((user) => {
+            console.log(user);
             return res.render("clients/cart", {
                 pageTitle: "Your Cart",
                 path: "/cart",
@@ -64,12 +68,12 @@ const renderCartPage = (req, res, next) => {
                 userName,
                 isAuthenticated: req.session.isLoggedin,
             });
-        }).catch(err => {
+        })
+        .catch((err) => {
             const error = new Error("User cart not Found", err);
             error.httpStatusCode = 500;
             return next(error);
         });
-
 };
 
 const addToCart = (req, res, next) => {
@@ -80,9 +84,9 @@ const addToCart = (req, res, next) => {
         if (response.includes("Error")) {
             const error = new Error("User cart missing", response);
             error.httpStatusCode = 500;
-            req.flash("error","User cart missing")
+            req.flash("error", "User cart missing");
             return next(error);
-        };
+        }
 
         return res.redirect("/clients/cart");
     });
@@ -140,7 +144,7 @@ const renderOrdersPage = (req, res, next) => {
     // get cookie-->true
     //   req.isLoggedin = (req.get('Cookie').split('=')[1])
     Order.find({})
-        .populate("cart.user", "address email")
+        .populate("cart.user")
         .select("cart._id cart.qty")
         .then((response) => {
             return res.render("clients/orders", {
@@ -160,6 +164,70 @@ const removeItem = (req, res, next) => {
     });
 };
 
+const getInvoice = (req, res, next) => {
+    let id = req.params.invoiceId;
+    let invoiceName = `invoice-${id}.pdf`;
+    let invoicePath = `${path}/data/invoices/${invoiceName}`;
+    // let invoicePath = `${path}/data/invoices/empty.pdf`;
+    return Order.findOne({ _id: id })
+        .then((doc) => {
+            if (!doc) {
+                res.status(442);
+                return next(new Error("Sorry Invoice not found"));
+            }
+            if (doc.cart.user.toString() !== req.user._id.toString()) {
+                res.status(442);
+                return next(new Error("Sorry Invoice not found"));
+            }
+            return doc.cart;
+        })
+        .then((cart) => {
+            /* Retrieve pdf file*/
+
+            // Method 1
+            /**
+         *   return fs.readFile(invoicePath , (err , data) => {
+                if(err) return next(err)
+                res.setHeader("Content-Type","application/pdf")
+                res.setHeader("Content-Disposition",'attachment; filename=' + invoiceName)
+                return res.send(data)
+            })
+
+         *
+         */
+
+            // Method 2
+            /**
+             const file = fs.createReadStream(invoicePath);
+            res.setHeader("Content-Type", "application/pdf");
+            res.setHeader("Content-Disposition", "attachment; filename=" + invoiceName);
+            return file.pipe(res);
+            */
+
+            // METHOD 3
+
+            const pdfFile = new pdfDoc();
+            pdfFile.pipe(fs.createWriteStream(invoicePath)); // create stream
+            res.setHeader("Content-Type", "application/pdf");
+            res.setHeader(
+                "Content-Disposition",
+                "attachment; filename=" + invoiceName
+            );
+
+            const html = `Your invoice
+            > Address : ${cart.proPrice}
+            > Email :  ${cart.user}
+            > Quantity :${ cart.qty}
+
+            `;
+
+            pdfFile.text(html);
+            pdfFile.end();
+            return pdfFile.pipe(res);
+        })
+        .catch((err) => next(err));
+};
+
 module.exports = {
     renderProductsPage,
     renderCartPage,
@@ -169,4 +237,5 @@ module.exports = {
     renderProdDetailsPage,
     addToCart,
     removeItem,
+    getInvoice,
 };
