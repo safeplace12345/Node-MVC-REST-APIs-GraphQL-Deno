@@ -178,11 +178,27 @@ const renderOrdersPage = (req, res, next) => {
 };
 
 const removeItem = (req, res, next) => {
-  let id = JSON.parse(JSON.stringify(req.body.productId));
-  req.user.removeFromCart(id, (response) => {
-    return res.redirect("/clients/cart");
-  });
+  // let id = JSON.parse(JSON.stringify(req.body.productId));
+  let id = req.params.productId;
+  if(req.user.removeFromCart(id)){
+     // check to see if we have a  filled cart
+    return  req.user
+        .removeFromCart(id)
+        .then((response) => {
+          return res.json({
+            success: "success",
+          });
+        })
+        .catch((err) =>
+          res.json({
+            error: err,
+          })
+        );
+  } else{
+    res.redirect("/clients/");
+  }
 };
+
 
 const getInvoice = (req, res, next) => {
   let id = req.params.invoiceId;

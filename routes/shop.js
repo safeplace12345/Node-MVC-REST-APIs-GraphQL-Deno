@@ -24,7 +24,7 @@ router.get('/orders', isAuth ,clientController.renderOrdersPage)
 
 router.get("/productDetails/:productId",clientController.renderProdDetailsPage)
 
-router.post('/remove-item', isAuth ,clientController.removeItem)
+router.post("/remove-item/:productId", isAuth, clientController.removeItem);
 
 router.get('/orders/:invoiceId', isAuth ,clientController.getInvoice)
 

@@ -65,7 +65,8 @@ userSchema.methods.emptyCart = function () {
     return this.save();
 };
 
-userSchema.methods.removeFromCart = function (productId, cb) {
+userSchema.methods.removeFromCart = function async (productId) {
+    
     productId = productId.trim();
     // Get Users cart
     let { cart } = this;
@@ -77,9 +78,9 @@ userSchema.methods.removeFromCart = function (productId, cb) {
     });
     this.cart = updated;
     console.log(this.cart);
-    return this.save(function (err) {
-        if (err) return console.log({ err });
-        return cb(`Success deleting from ${productId} cart`);
+    return this.save( async function (err) {
+        if (err) return console.error({ err });
+        return (`Success deleting from ${productId} cart`);
     });
 };
 

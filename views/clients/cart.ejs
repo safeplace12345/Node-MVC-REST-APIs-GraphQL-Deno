@@ -33,14 +33,14 @@
                 </div>
                 <div class="card__actions">
                     <button type="button" class="btn"><a href="/productDetails/<%= product.id %>"> Details</a></button>
-                  <form action="/clients/remove-item" method="POST" >
-                <input type="text" style="display: none;" name="productId" value="<%= product.item._id._id %> ">
-                <input type="text" value="<%=csrfToken%>" style="visibility: hidden;" name="_csrf">
+                  <!-- <form action="/clients/remove-item" method="POST" > -->
+                <input type="text" id="id" style="display: none;" name="productId" value="<%= product.item._id._id %> ">
+                <input type="text" id='_csrf' value="<%=csrfToken%>" style="visibility: hidden;" name="_csrf">
 
-                <button class="btn" type="submit">
+                <button class="btn" id='remove-btn' type="button">
                     Remove
                 </button>
-                </form>
+                <!-- </form> -->
                 </div>
             </article>
             <% } %>
@@ -56,4 +56,5 @@
             <h4>No Products Yet !!!</h4>
             <% } %>
         </main>
+        <script src="/js/index.js"></script>
     <%- include('../includes/footer.ejs') %>
